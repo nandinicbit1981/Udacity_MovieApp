@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="30dp">
+    </View>
+   <TextView
+       android:textStyle="bold"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="@string/select_options"/>
+    <RadioGroup
+        android:id="@+id/sortMovies"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <RadioButton
+            android:id="@+id/sortPopular"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_popular"
+            android:checked="true" />
+
+        <RadioButton
+            android:id="@+id/sortRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_rate" />
+
+    </RadioGroup>
+</LinearLayout>
