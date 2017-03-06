@@ -1,19 +1,21 @@
 package parimi.com.movieapp;
 
 import android.app.Activity;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 
 import java.util.List;
 
-import parimi.com.movieapp.R;
-
 public class MovieAdapter extends ArrayAdapter<Movie> {
+
+
     /**
      * This is our own custom constructor (it doesn't mirror a superclass constructor).
      * The context is used to inflate the layout file, and the List is the data we want
@@ -69,5 +71,16 @@ public class MovieAdapter extends ArrayAdapter<Movie> {
 
 
         return convertView;
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public ImageView iconView;
+        public CheckBox item_check;
+
+        public ViewHolder(View convertView) {
+            super(convertView);
+
+            iconView  = (ImageView) convertView.findViewById(R.id.flavor_image);
+        }
     }
 }

@@ -6,82 +6,89 @@
     android:layout_height="match_parent"
     tools:context="parimi.com.movieapp.DetailActivity">
 
-    <LinearLayout
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <TextView
-                android:paddingTop="20dp"
-                android:paddingLeft="20dp"
-                android:paddingBottom="20dp"
-                android:layout_width="match_parent"
-                android:layout_height="80dp"
-                android:textSize="30dp"
-                android:textStyle="bold"
-                android:fontFamily="Arial"
-                android:id="@+id/title"
-                android:background="@color/material_deep_teal_500"
-                android:textColor="@color/button_material_light"
-                />
-        </LinearLayout>
-        <LinearLayout
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="3dp"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <ImageView
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:scaleType="centerCrop"
-                    android:id="@+id/movie_image"/>
+                android:orientation="vertical">
+                <TextView
+                    tools:text="title"
+                    android:paddingTop="@dimen/title_top_padding"
+                    android:paddingLeft="@dimen/title_left_padding"
+                    android:paddingBottom="@dimen/title_bottom_padding"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/title_layout_height"
+                    android:textSize="@dimen/title_text_size"
+                    android:textStyle="bold"
+                    android:fontFamily="Arial"
+                    android:id="@+id/title"
+                    android:background="@color/material_deep_teal_500"
+                    android:textColor="@color/button_material_light"
+                    />
             </LinearLayout>
             <LinearLayout
-                android:paddingLeft="32dp"
+                android:paddingLeft="@dimen/center_panel_ll_left_padding"
+                android:paddingRight="@dimen/center_panel_ll_right_padding"
+                android:paddingTop="@dimen/center_panel_ll_top_padding"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <ImageView
+                        android:layout_width="@dimen/detail_view_image_width"
+                        android:layout_height="@dimen/detail_view_image_height"
+                        android:scaleType="centerCrop"
+                        android:id="@+id/movie_image"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:paddingLeft="@dimen/center_panel_ll_right_ll_padding"
+                    android:orientation="vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        tools:text="release_date"
+                        android:textSize="@dimen/release_date_textsize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/release_date"
+                        />
+                    <TextView
+                        tools:text="vote_average"
+                        android:textSize="@dimen/vote_average_textsize"
+                        android:textStyle="bold"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/vote_average"
+                        />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:paddingLeft="@dimen/bottom_panel_ll_padding_left"
+                android:paddingRight="@dimen/bottom_panel_ll_padding_right"
+                android:paddingTop="@dimen/bottom_panel_ll_padding_top"
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:textSize="30dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/release_date"
-                    />
-                <TextView
-                    android:textSize="20dp"
+                    tools:text="plotSynopsis"
+                    android:textSize="@dimen/plot_synopsis_textsize"
                     android:textStyle="bold"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/vote_average"
+                    android:id="@+id/plotSynopsis"
                     />
             </LinearLayout>
         </LinearLayout>
-        <LinearLayout
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingTop="3dp"
-            android:orientation="vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <TextView
-                android:textSize="20dp"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/plotSynopsis"
-                />
-        </LinearLayout>
-    </LinearLayout>
-
+    </ScrollView>
 
 </RelativeLayout>

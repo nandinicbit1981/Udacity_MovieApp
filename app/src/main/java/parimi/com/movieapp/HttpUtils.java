@@ -5,7 +5,7 @@ import com.loopj.android.http.RequestParams;
 
 public class HttpUtils {
     private static final String BASE_URL = "https://api.themoviedb.org/3/movie/";
-    private static final String API_KEY = "";//TODO replace with correct API;
+    private static final String API_KEY = BuildConfig.THE_MOVIE_DB_API_TOKEN;//"de9c335bcf10921c29babb85a73c47dd";//TODO replace with correct API;
 
     private static AsyncHttpClient client = new AsyncHttpClient();
 

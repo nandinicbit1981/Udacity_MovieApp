@@ -21,7 +21,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
-import parimi.com.movieapp.R;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -37,6 +36,7 @@ public class MainActivityFragment extends Fragment {
     private static String MOVIE_LIST = "MOVIE_LIST";
     int mCurrentPosition = 0;
     private ArrayList<Movie> results = null;
+    private String sortOrder = "";
 
     public MainActivityFragment() {
     }
@@ -89,8 +89,7 @@ public class MainActivityFragment extends Fragment {
     }
     public void getMovieList() {
         RequestParams rp = new RequestParams();
-        SharedPreferences sharedPreferences = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
-        String movieSorting = sharedPreferences.getString("sortOptions","popular");
+        String movieSorting = getSortPreference();
         HttpUtils.getImage(movieSorting, rp, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -128,8 +127,12 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public void onResume() {
+        if(sortOrder != "" && sortOrder != getSortPreference()) {
+            getMovieList();
+        }
         super.onResume();
     }
+
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
@@ -154,5 +157,10 @@ public class MainActivityFragment extends Fragment {
             getMovieList();
         }
         return rootView;
+    }
+
+    private String getSortPreference() {
+        SharedPreferences sharedPreferences = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
+        return sharedPreferences.getString("sortOptions","popular");
     }
 }
