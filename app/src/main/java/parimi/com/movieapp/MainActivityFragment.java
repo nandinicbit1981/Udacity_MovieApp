@@ -10,6 +10,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,19 +43,24 @@ public class MainActivityFragment extends Fragment {
     private String sortOrder = "";
     private RecyclerView recyclerView;
     private static final String BUNDLE_RECYCLER_LAYOUT = "classname.recycler.layout";
+    private String LOG_TAG = MainActivityFragment.class.getCanonicalName();
     public MainActivityFragment() {
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putParcelable(BUNDLE_RECYCLER_LAYOUT, recyclerView.getLayoutManager().onSaveInstanceState());
-        savedInstanceState.putParcelableArrayList(MOVIE_LIST, results);
-        mCurrentPosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-        SharedPreferences sharedPref = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putInt("currentRVPosition", mCurrentPosition);
-        editor.commit();
+        try {
+            savedInstanceState.putParcelable(BUNDLE_RECYCLER_LAYOUT, recyclerView.getLayoutManager().onSaveInstanceState());
+            savedInstanceState.putParcelableArrayList(MOVIE_LIST, results);
+            mCurrentPosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+            SharedPreferences sharedPref = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putInt("currentRVPosition", mCurrentPosition);
+            editor.commit();
+        }catch (Exception e) {
+            Log.i(LOG_TAG, e.getMessage());
+        }
 
     }
 
@@ -69,8 +75,7 @@ public class MainActivityFragment extends Fragment {
                for(int j=0; j < array.length(); j++) {
                    genres[j] = Integer.parseInt(array.get(j).toString());
                }
-               Movie yourPojo = new Movie(
-                       jsonObject.getString("poster_path"),
+               Movie yourPojo = new Movie(jsonObject.getString("poster_path"),
                jsonObject.getBoolean("adult"),
                jsonObject.getString("overview"),
                jsonObject.getString("release_date"),
