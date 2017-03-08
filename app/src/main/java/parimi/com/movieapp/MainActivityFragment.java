@@ -142,6 +142,7 @@ public class MainActivityFragment extends Fragment {
             mCurrentPosition = savedInstanceState.getInt(STATE_POSITION);
             results = savedInstanceState.<Movie>getParcelableArrayList(MOVIE_LIST);
             Parcelable savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
+            sortOrder = getSortPreference();
             movieAdapter = createAdapter(results);
             recyclerView.setAdapter(movieAdapter);
             recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), Utility.calculateNoOfColumns(getActivity())));
