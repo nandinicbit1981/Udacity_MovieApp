@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -47,11 +48,13 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-
-            savedInstanceState.putParcelable(BUNDLE_RECYCLER_LAYOUT, recyclerView.getLayoutManager().onSaveInstanceState());
-            savedInstanceState.putInt(STATE_POSITION, mCurrentPosition);
-            savedInstanceState.putParcelableArrayList(MOVIE_LIST, results);
-
+        savedInstanceState.putParcelable(BUNDLE_RECYCLER_LAYOUT, recyclerView.getLayoutManager().onSaveInstanceState());
+        savedInstanceState.putParcelableArrayList(MOVIE_LIST, results);
+        mCurrentPosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+        SharedPreferences sharedPref = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("currentRVPosition", mCurrentPosition);
+        editor.commit();
 
     }
 
@@ -105,7 +108,8 @@ public class MainActivityFragment extends Fragment {
                     recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), Utility.calculateNoOfColumns(getActivity())));
                     recyclerView.setAdapter(movieAdapter);
                     movieAdapter.notifyDataSetChanged();
-
+                    mCurrentPosition = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE).getInt("currentRVPosition", 0);
+                    recyclerView.scrollToPosition(mCurrentPosition);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -120,6 +124,9 @@ public class MainActivityFragment extends Fragment {
         }
         super.onResume();
     }
+
+
+
 
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
@@ -149,6 +156,8 @@ public class MainActivityFragment extends Fragment {
             recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), Utility.calculateNoOfColumns(getActivity())));
             recyclerView.setAdapter(movieAdapter);
             movieAdapter.notifyDataSetChanged();
+            mCurrentPosition = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE).getInt("currentRVPosition", 0);
+            recyclerView.scrollToPosition(mCurrentPosition);
         } else {
             getMovieList();
         }
@@ -160,6 +169,7 @@ public class MainActivityFragment extends Fragment {
         SharedPreferences sharedPreferences = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
         return sharedPreferences.getString("sortOptions","popular");
     }
+
 
     private MovieAdapter createAdapter(ArrayList<Movie> results) {
         return new MovieAdapter(results, getActivity().getApplicationContext(),new MovieAdapter.OnItemClickListener() {
