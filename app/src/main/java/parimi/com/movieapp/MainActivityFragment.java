@@ -154,6 +154,7 @@ public class MainActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sortOrder = getSortPreference();
         rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = ((RecyclerView) rootView.findViewById(R.id.my_recycler_view));
         if(savedInstanceState != null && savedInstanceState.getParcelableArrayList(MOVIE_LIST) != null) {
