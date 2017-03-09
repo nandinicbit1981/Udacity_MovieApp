@@ -44,6 +44,7 @@ public class MainActivityFragment extends Fragment {
     private RecyclerView recyclerView;
     private static final String BUNDLE_RECYCLER_LAYOUT = "classname.recycler.layout";
     private String LOG_TAG = MainActivityFragment.class.getCanonicalName();
+
     public MainActivityFragment() {
     }
 
@@ -58,7 +59,7 @@ public class MainActivityFragment extends Fragment {
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putInt("currentRVPosition", mCurrentPosition);
             editor.commit();
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.i(LOG_TAG, e.getMessage());
         }
 
@@ -66,38 +67,39 @@ public class MainActivityFragment extends Fragment {
 
     public ArrayList<Movie> createMovieList(JSONArray jsonArray) {
         ArrayList<Movie> movieList = new ArrayList<>();
-       try {
+        try {
 
-           for (int i = 0; i < jsonArray.length(); i++) {
-               JSONObject jsonObject = jsonArray.getJSONObject(i);
-               JSONArray array = jsonObject.getJSONArray("genre_ids");
-               int[] genres = new int[array.length()];
-               for(int j=0; j < array.length(); j++) {
-                   genres[j] = Integer.parseInt(array.get(j).toString());
-               }
-               Movie yourPojo = new Movie(jsonObject.getString("poster_path"),
-               jsonObject.getBoolean("adult"),
-               jsonObject.getString("overview"),
-               jsonObject.getString("release_date"),
-               genres,
-               jsonObject.getInt("id"),
-               jsonObject.getString("original_title"),
-               jsonObject.getString("original_language"),
-               jsonObject.getString("title"),
-               jsonObject.getString("backdrop_path"),
-               jsonObject.getLong("popularity"),
-               jsonObject.getInt("vote_count"),
-               jsonObject.getBoolean("video"),
-               jsonObject.getLong("vote_average")
-               );
-               movieList.add(yourPojo);
-           }
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject = jsonArray.getJSONObject(i);
+                JSONArray array = jsonObject.getJSONArray("genre_ids");
+                int[] genres = new int[array.length()];
+                for (int j = 0; j < array.length(); j++) {
+                    genres[j] = Integer.parseInt(array.get(j).toString());
+                }
+                Movie yourPojo = new Movie(jsonObject.getString("poster_path"),
+                        jsonObject.getBoolean("adult"),
+                        jsonObject.getString("overview"),
+                        jsonObject.getString("release_date"),
+                        genres,
+                        jsonObject.getInt("id"),
+                        jsonObject.getString("original_title"),
+                        jsonObject.getString("original_language"),
+                        jsonObject.getString("title"),
+                        jsonObject.getString("backdrop_path"),
+                        jsonObject.getLong("popularity"),
+                        jsonObject.getInt("vote_count"),
+                        jsonObject.getBoolean("video"),
+                        jsonObject.getLong("vote_average")
+                );
+                movieList.add(yourPojo);
+            }
 
-       }catch (Exception e) {
+        } catch (Exception e) {
 
-       }
+        }
         return movieList;
     }
+
     public void getMovieList() {
         RequestParams rp = new RequestParams();
         String movieSorting = getSortPreference();
@@ -106,9 +108,10 @@ public class MainActivityFragment extends Fragment {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     results = createMovieList(response.getJSONArray("results"));
-                    if(movieAdapter ==null){
+                    if (movieAdapter == null) {
                         movieAdapter = createAdapter(results);
                     }
+                    movieAdapter.swapData(results);
                     recyclerView = ((RecyclerView) rootView.findViewById(R.id.my_recycler_view));
                     recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), Utility.calculateNoOfColumns(getActivity())));
                     recyclerView.setAdapter(movieAdapter);
@@ -124,20 +127,18 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public void onResume() {
-        if(sortOrder != "" && sortOrder != getSortPreference()) {
+        if (!sortOrder.equals(getSortPreference())) {
             getMovieList();
         }
         super.onResume();
     }
 
 
-
-
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         // Restore UI state from the savedInstanceState.
-        if(savedInstanceState != null) {
+        if (savedInstanceState != null) {
             recyclerView = ((RecyclerView) rootView.findViewById(R.id.my_recycler_view));
             mCurrentPosition = savedInstanceState.getInt(STATE_POSITION);
             results = savedInstanceState.<Movie>getParcelableArrayList(MOVIE_LIST);
@@ -158,7 +159,7 @@ public class MainActivityFragment extends Fragment {
         sortOrder = getSortPreference();
         rootView = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = ((RecyclerView) rootView.findViewById(R.id.my_recycler_view));
-        if(savedInstanceState != null && savedInstanceState.getParcelableArrayList(MOVIE_LIST) != null) {
+        if (savedInstanceState != null && savedInstanceState.getParcelableArrayList(MOVIE_LIST) != null) {
             movieAdapter = createAdapter(savedInstanceState.<Movie>getParcelableArrayList(MOVIE_LIST));
             recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), Utility.calculateNoOfColumns(getActivity())));
             recyclerView.setAdapter(movieAdapter);
@@ -174,13 +175,14 @@ public class MainActivityFragment extends Fragment {
 
     private String getSortPreference() {
         SharedPreferences sharedPreferences = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
-        return sharedPreferences.getString("sortOptions","popular");
+        return sharedPreferences.getString("sortOptions", "popular");
     }
 
 
     private MovieAdapter createAdapter(ArrayList<Movie> results) {
-        return new MovieAdapter(results, getActivity().getApplicationContext(),new MovieAdapter.OnItemClickListener() {
-            @Override public void onItemClick(Movie item) {
+        return new MovieAdapter(results, getActivity().getApplicationContext(), new MovieAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Movie item) {
                 Intent intent = new Intent(getActivity(), DetailActivity.class);
                 try {
                     Gson gson = new Gson();

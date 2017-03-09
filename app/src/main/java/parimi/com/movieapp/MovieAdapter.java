@@ -35,12 +35,15 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             Glide
                     .with(context)
                     .load("http://image.tmdb.org/t/p/w185/" + url)
+                    .placeholder(R.drawable.placeholder)
+                    .error(R.drawable.error)
                     .centerCrop()
                     .crossFade()
                     .into(iconView);
 
             itemView.setOnClickListener(new View.OnClickListener() {
-                @Override public void onClick(View v) {
+                @Override
+                public void onClick(View v) {
                     listener.onItemClick(item);
                 }
             });
@@ -66,9 +69,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         this.listener = listener;
     }
 
+    public void swapData(ArrayList<Movie> results) {
+        mDataset = results;
+        notifyDataSetChanged();
+    }
+
     @Override
     public MovieAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                   int viewType) {
+                                                      int viewType) {
         // create a new view
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.flavor_item, parent, false);
         // set the view's size, margins, paddings and layout parameters

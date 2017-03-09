@@ -8,7 +8,6 @@ import android.widget.RadioGroup;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import parimi.com.movieapp.R;
 
 public class SettingsActivity extends BaseActivity {
 
@@ -31,11 +30,11 @@ public class SettingsActivity extends BaseActivity {
         SharedPreferences sharedPref = getSharedPreferences("MoviePrefs", MODE_PRIVATE);
         String selectedOption = sharedPref.getString("sortOptions", "popular");
         RadioButton sortOptionsRB;
-        if(selectedOption.equals(getString(R.string.popular_option))){
-            sortOptionsRB =  (RadioButton) findViewById(R.id.sortPopular);
+        if (selectedOption.equals(getString(R.string.popular_option))) {
+            sortOptionsRB = (RadioButton) findViewById(R.id.sortPopular);
             sortOptionsRB.setChecked(true);
         } else {
-            sortOptionsRB =  (RadioButton) findViewById(R.id.sortRating);
+            sortOptionsRB = (RadioButton) findViewById(R.id.sortRating);
             sortOptionsRB.setChecked(true);
         }
 
@@ -48,7 +47,7 @@ public class SettingsActivity extends BaseActivity {
 
     @OnClick(R.id.sortRating)
     void onSortRatingClick() {
-       updatePreferences(getString(R.string.top_rated_option));
+        updatePreferences(getString(R.string.top_rated_option));
     }
 
 
