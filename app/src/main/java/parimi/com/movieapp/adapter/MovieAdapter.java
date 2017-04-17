@@ -1,4 +1,4 @@
-package parimi.com.movieapp;
+package parimi.com.movieapp.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+
+import parimi.com.movieapp.R;
+import parimi.com.movieapp.model.Movie;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
 
@@ -31,7 +34,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         }
 
         public void bind(final Movie item, final OnItemClickListener listener) {
-            String url = item.poster_path;
+            String url = item.getposter_path();
             Glide
                     .with(context)
                     .load("http://image.tmdb.org/t/p/w185/" + url)

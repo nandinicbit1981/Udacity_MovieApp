@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package parimi.com.movieapp;
+package parimi.com.movieapp.data;
 
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -36,7 +36,9 @@ public class MovieContract {
 
         public static final String COLUMN_MOVIE = "movie_id";
 
-        public static final String FAVORITE = "favorite";
+        public static final String TITLE = "title";
+
+        public static final String POSTER_PATH = "poster_path";
 
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_MOVIE)

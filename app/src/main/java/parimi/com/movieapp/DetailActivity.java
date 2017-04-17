@@ -23,6 +23,15 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cz.msebera.android.httpclient.Header;
+import parimi.com.movieapp.adapter.ReviewAdapter;
+import parimi.com.movieapp.adapter.TrailerAdapter;
+import parimi.com.movieapp.data.MovieContract;
+import parimi.com.movieapp.model.MovieDB;
+import parimi.com.movieapp.model.Review;
+import parimi.com.movieapp.model.Trailer;
+import parimi.com.movieapp.utils.HttpUtils;
+import parimi.com.movieapp.utils.MovieUtils;
+import parimi.com.movieapp.utils.PreferenceUtils;
 
 public class DetailActivity extends AppCompatActivity {
 
@@ -36,13 +45,13 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        String movieInfo = getIntent().getExtras().get("movieInfo").toString();
+        String movieInfo = getIntent().getExtras().get(getString(R.string.movie_info)).toString();
 
         try {
             movie = new JSONObject(movieInfo);
             ImageView iconView = (ImageView) findViewById(R.id.movie_image);
 
-            String url = movie.get("poster_path").toString();
+            String url = movie.get(getString(R.string.poster_path)).toString();
             ButterKnife.bind(this);
             Glide
                     .with(getApplicationContext())
@@ -51,78 +60,52 @@ public class DetailActivity extends AppCompatActivity {
                     .crossFade()
                     .into(iconView);
 
-            String dateOfRelease = movie.get("release_date").toString();
-            dateOfRelease = dateOfRelease.split("-")[0];
-            ((TextView) findViewById(R.id.title)).setText(movie.get("title").toString());
-            ((TextView) findViewById(R.id.release_date)).setText(dateOfRelease);
-            ((TextView) findViewById(R.id.vote_average)).setText(movie.get("vote_average").toString() + "/10");
-            ((TextView) findViewById(R.id.plotSynopsis)).setText(movie.get("overview").toString());
-            getTrailerList(String.valueOf(movie.get("id")));
-            getReviewList(String.valueOf(movie.get("id")));
-            String[] projection = {
-                    MovieContract.MovieEntry._ID,
-                    MovieContract.MovieEntry.COLUMN_MOVIE,
-                    MovieContract.MovieEntry.FAVORITE};
+            if (PreferenceUtils.getFavoritesPreference(getBaseContext())) {
+                RequestParams rp = new RequestParams();
+                HttpUtils.getMovieById(movie.get(getString(R.string.movie_id)).toString(), rp, new JsonHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                        try {
 
-            Cursor cursor = getContentResolver().query(
-                    MovieContract.MovieEntry.CONTENT_URI,
-                    new String[]{MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE, MovieContract.MovieEntry.FAVORITE},
-                    MovieContract.MovieEntry.COLUMN_MOVIE + " = " + String.valueOf(movie.get("id")),
-                    null,
-                    null);
-
-            Cursor cursor1 = getContentResolver().query(
-                    MovieContract.MovieEntry.CONTENT_URI,
-                   null,
-                    null,
-                    null,
-                    null);
-
-            System.out.println(cursor1);
-            if(cursor.moveToFirst()) {
-               MovieDB movieDB = cursorToMovie(cursor);
-                if(movieDB.favorite != null) {
-                    favoriteBtn.setChecked(movieDB.favorite);
-                } else {
-                    favoriteBtn.setChecked(false);
-                }
+                            movie = response;
+                            // as the response has id of the movie in the "id" field, explicitly setting the id.
+                            movie.put(getString(R.string.movie_id), response.getString("id"));
+                            updateDetails();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             } else {
-                favoriteBtn.setChecked(false);
+                updateDetails();
             }
-            cursor.close();
+
+
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    private MovieDB cursorToMovie(Cursor cursor) {
-        MovieDB movieDb = new MovieDB();
-        //movieDb.id = cursor.getLong(0);
-        if(cursor.getLong(0) > -1) {
-            movieDb.movie = cursor.getString(1);
-            movieDb.favorite = (cursor.getInt(2) == 1);
-        }
-        return movieDb;
-    }
-
     @OnClick(R.id.favorite_btn)
     public void clickFavBtn() {
         try {
             ContentValues values = new ContentValues();
-            values.put(MovieContract.MovieEntry.COLUMN_MOVIE, movie.getString("id"));
-            values.put(MovieContract.MovieEntry.FAVORITE, favoriteBtn.isChecked());
-            if(dbFavRecord() != null && dbFavRecord().movie == movie.getString("id")) {
-                getContentResolver().update( MovieContract.MovieEntry.CONTENT_URI,
-                        values,
-                        MovieContract.MovieEntry.COLUMN_MOVIE + " = " + String.valueOf(movie.get("id")),
+            MovieDB movieDB = dbFavRecord();
+
+            values.put(MovieContract.MovieEntry.COLUMN_MOVIE, movie.getString(getString(R.string.movie_id)));
+            values.put(MovieContract.MovieEntry.TITLE, movie.getString(getString(R.string.title)));
+            values.put(MovieContract.MovieEntry.POSTER_PATH, movie.getString(getString(R.string.poster_path)));
+            if(movieDB != null && String.valueOf(movieDB.getMovie_id()).equals(movie.getString(getString(R.string.movie_id)))) {
+                getContentResolver().delete( MovieContract.MovieEntry.CONTENT_URI,
+                        MovieContract.MovieEntry.COLUMN_MOVIE + " = " + movieDB.getMovie_id(),
                         null
                 );
             } else {
                 getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, values);
             }
         } catch (Exception e) {
-
+            System.out.println(e.getMessage());
         }
     }
 
@@ -132,13 +115,14 @@ public class DetailActivity extends AppCompatActivity {
         try {
             Cursor cursor = getContentResolver().query(
                     MovieContract.MovieEntry.CONTENT_URI,
-                    new String[]{MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE, MovieContract.MovieEntry.FAVORITE},
-                    MovieContract.MovieEntry.COLUMN_MOVIE + " = " + String.valueOf(movie.get("id")),
+                    new String[]{MovieContract.MovieEntry._ID, MovieContract.MovieEntry.COLUMN_MOVIE, MovieContract.MovieEntry.TITLE, MovieContract.MovieEntry.POSTER_PATH}, // nandini
+                    MovieContract.MovieEntry.COLUMN_MOVIE + " = " + String.valueOf(movie.get(getString(R.string.movie_id))),
                     null,
                     null);
 
-
-                movieDB = cursorToMovie(cursor);
+                if(cursor.moveToFirst()) {
+                    movieDB = MovieUtils.cursorToMovie(cursor);
+                }
 
         }catch (Exception e) {
             System.out.println(e);
@@ -159,6 +143,11 @@ public class DetailActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
             }
         });
     }
@@ -186,7 +175,7 @@ public class DetailActivity extends AppCompatActivity {
 
 
     private void getTrailerList(String id){
-        HttpUtils.getTrailers(String.valueOf(id), new RequestParams(), new JsonHttpResponseHandler() {
+        HttpUtils.getTrailers(id, new RequestParams(), new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
@@ -199,6 +188,11 @@ public class DetailActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
+            }
         });
     }
 
@@ -208,7 +202,8 @@ public class DetailActivity extends AppCompatActivity {
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                Trailer trailer = new Trailer(jsonObject.getString("id"),
+                Trailer trailer = new Trailer(
+                        jsonObject.getString("id"),
                         jsonObject.getString("iso_639_1"),
                         jsonObject.getString("iso_3166_1"),
                         jsonObject.getString("key"),
@@ -224,6 +219,53 @@ public class DetailActivity extends AppCompatActivity {
 
         }
         return trailerArrayList;
+    }
+
+
+    public void updateDetails() {
+        try {
+            String dateOfRelease = movie.get(getString(R.string.release_date)).toString();
+            dateOfRelease = dateOfRelease.split("-")[0];
+            ((TextView) findViewById(R.id.title)).setText(movie.get(getString(R.string.title)).toString());
+            ((TextView) findViewById(R.id.release_date)).setText(dateOfRelease);
+            ((TextView) findViewById(R.id.vote_average)).setText(movie.get(getString(R.string.vote_average)).toString() + "/10");
+            ((TextView) findViewById(R.id.plotSynopsis)).setText(movie.get(getString(R.string.overview)).toString());
+            getTrailerList(String.valueOf(movie.get(getString(R.string.movie_id))));
+            getReviewList(String.valueOf(movie.get(getString(R.string.movie_id))));
+            setFavorite();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void setFavorite() {
+        try {
+            if (!PreferenceUtils.getFavoritesPreference(getBaseContext())) {
+                String[] projection = {
+                        MovieContract.MovieEntry._ID,
+                        MovieContract.MovieEntry.COLUMN_MOVIE,
+                        MovieContract.MovieEntry.TITLE,
+                        MovieContract.MovieEntry.POSTER_PATH};
+
+                Cursor cursor = getContentResolver().query(
+                        MovieContract.MovieEntry.CONTENT_URI,
+                        projection,
+                        MovieContract.MovieEntry.COLUMN_MOVIE + " = " + String.valueOf(movie.get(getString(R.string.movie_id))),
+                        null,
+                        null);
+
+                if (cursor.moveToFirst()) {
+                    favoriteBtn.setChecked(true);
+                } else {
+                    favoriteBtn.setChecked(false);
+                }
+                cursor.close();
+            } else {
+                favoriteBtn.setChecked(true);
+            }
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 

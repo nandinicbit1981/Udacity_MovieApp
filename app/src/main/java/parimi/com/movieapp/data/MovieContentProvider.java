@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package parimi.com.movieapp;
+package parimi.com.movieapp.data;
 
 import android.content.ContentProvider;
 import android.content.ContentUris;
@@ -25,8 +25,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
-
-import static parimi.com.movieapp.MovieContract.MovieEntry.TABLE_NAME;
 
 public class MovieContentProvider extends ContentProvider {
 
@@ -81,7 +79,7 @@ public class MovieContentProvider extends ContentProvider {
         switch (match) {
             case MOVIES:
 
-                long id = db.insert(TABLE_NAME, null, values);
+                long id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
                 if ( id > 0 ) {
                     returnUri = ContentUris.withAppendedId(MovieContract.MovieEntry.CONTENT_URI, id);
                 } else {
@@ -117,7 +115,7 @@ public class MovieContentProvider extends ContentProvider {
         switch (match) {
             // Query for the tasks directory
             case MOVIES:
-                retCursor =  db.query(TABLE_NAME,
+                retCursor =  db.query(MovieContract.MovieEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -141,7 +139,9 @@ public class MovieContentProvider extends ContentProvider {
     // Implement delete to delete a single row of data
     @Override
     public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        final SQLiteDatabase db = mMovieDbHelper.getWritableDatabase();
+        int delete = db.delete(MovieContract.MovieEntry.TABLE_NAME, selection, null);
+        return delete;
     }
 
 
@@ -155,23 +155,23 @@ public class MovieContentProvider extends ContentProvider {
 
         // Write URI match code and set a variable to return a Cursor
         int match = sUriMatcher.match(uri);
-        int movieUpdated;
+        int movieUpdated = -1;
         // Query for the tasks directory and write a default case
-        switch (match) {
-            // Query for the tasks directory
-            case MOVIES:
-
-                String selectionParam = MovieContract.MovieEntry.COLUMN_MOVIE + " =";
-                String id = uri.getPathSegments().get(1);
-                String[] selectionArgParam = { String.valueOf(id) };
-                movieUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, "_id=?", new String[]{id});
-                break;
-            // Default exception
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        try {
+            switch (match) {
+                // Query for the tasks directory
+                case MOVIES:
+                    movieUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, MovieContract.MovieEntry.COLUMN_MOVIE + "=" + values.get("movie"), null);
+                    break;
+                // Default exception
+                default:
+                    throw new UnsupportedOperationException("Unknown uri: " + uri);
+            }
+        }catch (Exception e) {
+            System.out.printf(e.getMessage());
         }
 
-        if (movieUpdated != 0) {
+        if (movieUpdated > -1) {
             //set notifications if a task was updated
             getContext().getContentResolver().notifyChange(uri, null);
         }

@@ -1,4 +1,4 @@
-package parimi.com.movieapp;
+package parimi.com.movieapp.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import parimi.com.movieapp.R;
+import parimi.com.movieapp.model.Review;
 
 /**
  * Created by nandpa on 4/16/17.
@@ -32,11 +35,10 @@ public class ReviewAdapter extends ArrayAdapter<Review> {
         TextView authorName = (TextView) convertView.findViewById(R.id.author);
 
         // Populate the data into the template view using the data object
-        authorName.setText(review.author);
+        authorName.setText(review.getAuthor());
 
         TextView content = (TextView) convertView.findViewById(R.id.review_content);
-        content.setText(review.content);
-        System.out.println(review.content);
+        content.setText(review.getContent());
 
         // Return the completed view to render on screen
         return convertView;

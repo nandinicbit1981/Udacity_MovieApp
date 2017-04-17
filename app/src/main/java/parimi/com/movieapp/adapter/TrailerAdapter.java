@@ -1,4 +1,4 @@
-package parimi.com.movieapp;
+package parimi.com.movieapp.adapter;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import parimi.com.movieapp.R;
+import parimi.com.movieapp.model.Trailer;
 
 /**
  * Created by nandpa on 4/16/17.
@@ -41,13 +44,13 @@ public class TrailerAdapter extends ArrayAdapter<Trailer>{
                 Trailer trailer1 = getItem(itemPos);
 
                 Intent videoClient = new Intent(Intent.ACTION_VIEW);
-                videoClient.setData(Uri.parse("http://m.youtube.com/watch?v="+ trailer1.key));
+                videoClient.setData(Uri.parse("http://m.youtube.com/watch?v="+ trailer1.getKey()));
                 videoClient.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 getContext().startActivity(videoClient);
             }
         });
         // Populate the data into the template view using the data object
-        trailerName.setText(trailer.name);
+        trailerName.setText(trailer.getName());
 
         // Return the completed view to render on screen
         return convertView;

@@ -32,7 +32,7 @@
                     android:textColor="@color/button_material_light"
                     android:textSize="@dimen/title_text_size"
                     android:textStyle="bold"
-                    tools:text="title" />
+                    tools:text="@string/title" />
 
                 <CheckBox
                     android:id="@+id/favorite_btn"
@@ -79,7 +79,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/release_date_textsize"
-                        tools:text="release_date" />
+                        tools:text="@string/release_date" />
 
                     <TextView
                         android:id="@+id/vote_average"
@@ -87,7 +87,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="@dimen/vote_average_textsize"
                         android:textStyle="bold"
-                        tools:text="vote_average" />
+                        tools:text="@string/vote_average" />
 
                 </LinearLayout>
 
@@ -107,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/plot_synopsis_textsize"
                     android:textStyle="bold"
-                    tools:text="plotSynopsis" />
+                    tools:text="@string/plot_synopsis" />
             </LinearLayout>
             <LinearLayout
                 android:paddingTop="20dp"

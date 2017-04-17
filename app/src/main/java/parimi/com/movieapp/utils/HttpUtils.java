@@ -1,8 +1,10 @@
-package parimi.com.movieapp;
+package parimi.com.movieapp.utils;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+
+import parimi.com.movieapp.BuildConfig;
 
 public class HttpUtils {
     private static final String BASE_URL = "https://api.themoviedb.org/3/movie/";
@@ -25,6 +27,12 @@ public class HttpUtils {
         params.add("api_key", API_KEY);
         client.get(getReviewUrl(id), params, responseHandler);
     }
+
+    public static void getMovieById(String id, RequestParams params, AsyncHttpResponseHandler responseHandler) {
+        params.add("api_key", API_KEY);
+        client.get(BASE_URL + id, params, responseHandler);
+    }
+
 
 
     private static String getAbsoluteUrl(String relativeUrl) {

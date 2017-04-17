@@ -29,7 +29,7 @@
                 android:value="parimi.com.movieapp.MainActivity" />
         </activity>
 
-        <provider android:name=".MovieContentProvider"
+        <provider android:name=".data.MovieContentProvider"
             android:exported="true"
             android:readPermission="true"
             android:writePermission="true"

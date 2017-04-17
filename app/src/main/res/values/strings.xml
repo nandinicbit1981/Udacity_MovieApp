@@ -11,4 +11,15 @@
     <string name="trailer">Trailer</string>
     <string name="reviews">Reviews:</string>
     <string name="author">Author:</string>
+    <string name="favorite">Show favorites</string>
+    <string name="movie_id">movie_id</string>
+    <string name="poster_path">poster_path</string>
+    <string name="title">title</string>
+    <string name="vote_average">vote_average</string>
+    <string name="overview">overview</string>
+    <string name="release_date">release_date</string>
+    <string name="movie_info">movieInfo</string>
+    <string name="plot_synopsis">plot_synopsis</string>
+    <string name="movie_prefs">MoviePrefs</string>
+    <string name="show_favorite_pref">showFavorite</string>
 </resources>

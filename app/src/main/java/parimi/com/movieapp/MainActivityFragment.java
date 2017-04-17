@@ -1,15 +1,14 @@
 package parimi.com.movieapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +18,20 @@ import com.google.gson.Gson;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
+import parimi.com.movieapp.adapter.MovieAdapter;
+import parimi.com.movieapp.data.MovieContract;
+import parimi.com.movieapp.model.Movie;
+import parimi.com.movieapp.model.MovieDB;
+import parimi.com.movieapp.utils.HttpUtils;
+import parimi.com.movieapp.utils.MovieUtils;
+import parimi.com.movieapp.utils.PreferenceUtils;
+import parimi.com.movieapp.utils.UiUtils;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -41,11 +47,34 @@ public class MainActivityFragment extends Fragment {
     int mCurrentPosition = 0;
     private ArrayList<Movie> results = null;
     private String sortOrder = "";
+    private Boolean showFavorites = false;
     private RecyclerView recyclerView;
     private static final String BUNDLE_RECYCLER_LAYOUT = "classname.recycler.layout";
     private String LOG_TAG = MainActivityFragment.class.getCanonicalName();
 
     public MainActivityFragment() {
+    }
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sortOrder = PreferenceUtils.getSortPreference(getActivity());
+        showFavorites = PreferenceUtils.getFavoritesPreference(getActivity());
+        rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        recyclerView = ((RecyclerView) rootView.findViewById(R.id.my_recycler_view));
+        if (savedInstanceState != null && savedInstanceState.getParcelableArrayList(MOVIE_LIST) != null) {
+            movieAdapter = createAdapter(savedInstanceState.<Movie>getParcelableArrayList(MOVIE_LIST));
+            recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), UiUtils.calculateNoOfColumns(getActivity())));
+            recyclerView.setAdapter(movieAdapter);
+            movieAdapter.notifyDataSetChanged();
+            mCurrentPosition = getActivity().getApplicationContext().getSharedPreferences(getString(R.string.movie_prefs), MODE_PRIVATE).getInt("currentRVPosition", 0);
+            recyclerView.scrollToPosition(mCurrentPosition);
+        } else {
+            getMovieList();
+        }
+        return rootView;
     }
 
     @Override
@@ -55,7 +84,7 @@ public class MainActivityFragment extends Fragment {
             savedInstanceState.putParcelable(BUNDLE_RECYCLER_LAYOUT, recyclerView.getLayoutManager().onSaveInstanceState());
             savedInstanceState.putParcelableArrayList(MOVIE_LIST, results);
             mCurrentPosition = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
-            SharedPreferences sharedPref = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
+            SharedPreferences sharedPref = getActivity().getApplicationContext().getSharedPreferences(getString(R.string.movie_prefs), MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putInt("currentRVPosition", mCurrentPosition);
             editor.commit();
@@ -65,69 +94,59 @@ public class MainActivityFragment extends Fragment {
 
     }
 
-    public ArrayList<Movie> createMovieList(JSONArray jsonArray) {
-        ArrayList<Movie> movieList = new ArrayList<>();
-        try {
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                JSONArray array = jsonObject.getJSONArray("genre_ids");
-                int[] genres = new int[array.length()];
-                for (int j = 0; j < array.length(); j++) {
-                    genres[j] = Integer.parseInt(array.get(j).toString());
-                }
-                Movie yourPojo = new Movie(jsonObject.getString("poster_path"),
-                        jsonObject.getBoolean("adult"),
-                        jsonObject.getString("overview"),
-                        jsonObject.getString("release_date"),
-                        genres,
-                        jsonObject.getInt("id"),
-                        jsonObject.getString("original_title"),
-                        jsonObject.getString("original_language"),
-                        jsonObject.getString("title"),
-                        jsonObject.getString("backdrop_path"),
-                        jsonObject.getLong("popularity"),
-                        jsonObject.getInt("vote_count"),
-                        jsonObject.getBoolean("video"),
-                        jsonObject.getLong("vote_average")
-                );
-                movieList.add(yourPojo);
-            }
-
-        } catch (Exception e) {
-
-        }
-        return movieList;
-    }
 
     public void getMovieList() {
         RequestParams rp = new RequestParams();
-        String movieSorting = getSortPreference();
-        HttpUtils.getImage(movieSorting, rp, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                try {
-                    results = createMovieList(response.getJSONArray("results"));
-                    if (movieAdapter == null) {
-                        movieAdapter = createAdapter(results);
+        String movieSorting = PreferenceUtils.getSortPreference(getActivity());
+        Boolean showFavorites = PreferenceUtils.getFavoritesPreference(getActivity());
+        if(!showFavorites) {
+            HttpUtils.getImage(movieSorting, rp, new JsonHttpResponseHandler() {
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    try {
+                        results = MovieUtils.createMovieList(response.getJSONArray("results"));
+                        updateMovieAdapter();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                    movieAdapter.swapData(results);
-                    recyclerView = ((RecyclerView) rootView.findViewById(R.id.my_recycler_view));
-                    recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), Utility.calculateNoOfColumns(getActivity())));
-                    recyclerView.setAdapter(movieAdapter);
-                    movieAdapter.notifyDataSetChanged();
-                    mCurrentPosition = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE).getInt("currentRVPosition", 0);
-                    recyclerView.scrollToPosition(mCurrentPosition);
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-            }
-        });
+            });
+        } else {
+            results = new ArrayList<>();
+            String[] projection = {
+                    MovieContract.MovieEntry._ID,
+                    MovieContract.MovieEntry.COLUMN_MOVIE,
+                    MovieContract.MovieEntry.TITLE,
+                    MovieContract.MovieEntry.POSTER_PATH};
+                    Cursor movieCursor = getActivity().getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI, projection, null, null, null);
+                    if(movieCursor.moveToFirst()) {
+                        while(!movieCursor.isAfterLast()) {
+                            MovieDB movieDB = MovieUtils.cursorToMovie(movieCursor);
+                            Movie movie = MovieUtils.movieDBtoMovie(movieDB);
+                            results.add(movie);
+                            movieCursor.moveToNext();
+                        }
+
+                    }
+            updateMovieAdapter();
+        }
     }
 
+    public void updateMovieAdapter() {
+        if (movieAdapter == null) {
+            movieAdapter = createAdapter(results);
+        }
+        movieAdapter.swapData(results);
+        recyclerView = ((RecyclerView) rootView.findViewById(R.id.my_recycler_view));
+        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), UiUtils.calculateNoOfColumns(getActivity())));
+        recyclerView.setAdapter(movieAdapter);
+        movieAdapter.notifyDataSetChanged();
+        mCurrentPosition = getActivity().getApplicationContext().getSharedPreferences(getString(R.string.movie_prefs), MODE_PRIVATE).getInt("currentRVPosition", 0);
+        recyclerView.scrollToPosition(mCurrentPosition);
+    }
     @Override
     public void onResume() {
-        if (!sortOrder.equals(getSortPreference())) {
+        if (!sortOrder.equals(PreferenceUtils.getSortPreference(getActivity()))) {
             getMovieList();
         }
         super.onResume();
@@ -143,41 +162,13 @@ public class MainActivityFragment extends Fragment {
             mCurrentPosition = savedInstanceState.getInt(STATE_POSITION);
             results = savedInstanceState.<Movie>getParcelableArrayList(MOVIE_LIST);
             Parcelable savedRecyclerLayoutState = savedInstanceState.getParcelable(BUNDLE_RECYCLER_LAYOUT);
-            sortOrder = getSortPreference();
+            sortOrder = PreferenceUtils.getSortPreference(getActivity());
             movieAdapter = createAdapter(results);
             recyclerView.setAdapter(movieAdapter);
-            recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), Utility.calculateNoOfColumns(getActivity())));
+            recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), UiUtils.calculateNoOfColumns(getActivity())));
             recyclerView.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
         }
     }
-
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        sortOrder = getSortPreference();
-        rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        recyclerView = ((RecyclerView) rootView.findViewById(R.id.my_recycler_view));
-        if (savedInstanceState != null && savedInstanceState.getParcelableArrayList(MOVIE_LIST) != null) {
-            movieAdapter = createAdapter(savedInstanceState.<Movie>getParcelableArrayList(MOVIE_LIST));
-            recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), Utility.calculateNoOfColumns(getActivity())));
-            recyclerView.setAdapter(movieAdapter);
-            movieAdapter.notifyDataSetChanged();
-            mCurrentPosition = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE).getInt("currentRVPosition", 0);
-            recyclerView.scrollToPosition(mCurrentPosition);
-        } else {
-            getMovieList();
-        }
-        return rootView;
-    }
-
-
-    private String getSortPreference() {
-        SharedPreferences sharedPreferences = getActivity().getApplicationContext().getSharedPreferences("MoviePrefs", MODE_PRIVATE);
-        return sharedPreferences.getString("sortOptions", "popular");
-    }
-
 
     private MovieAdapter createAdapter(ArrayList<Movie> results) {
         return new MovieAdapter(results, getActivity().getApplicationContext(), new MovieAdapter.OnItemClickListener() {
@@ -199,13 +190,3 @@ public class MainActivityFragment extends Fragment {
 
 }
 
-
-
-class Utility {
-    public static int calculateNoOfColumns(Context context) {
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-        int noOfColumns = (int) (dpWidth / 180);
-        return noOfColumns;
-    }
-}

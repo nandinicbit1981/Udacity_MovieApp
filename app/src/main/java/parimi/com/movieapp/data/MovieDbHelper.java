@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package parimi.com.movieapp;
+package parimi.com.movieapp.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -47,11 +47,16 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 "CREATE TABLE " + MovieContract.MovieEntry.TABLE_NAME + " (" +
 
 
-                MovieContract.MovieEntry._ID               + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                MovieContract.MovieEntry._ID                + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 
-                MovieContract.MovieEntry.COLUMN_MOVIE       + " TEXT NOT NULL, "                 +
+                MovieContract.MovieEntry.COLUMN_MOVIE       + " INTEGER NOT NULL, "                 +
 
-                MovieContract.MovieEntry.FAVORITE + " BOOLEAN " + ");";
+                MovieContract.MovieEntry.TITLE              + " TEXT NOT NULL, "                   +
+
+                MovieContract.MovieEntry.POSTER_PATH        + " TEXT NOT NULL"
+
+
+                        + ");"; // nandini
 
 
         sqLiteDatabase.execSQL(SQL_CREATE_WEATHER_TABLE);
