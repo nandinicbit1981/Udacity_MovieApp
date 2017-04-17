@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_detail"
     android:layout_width="match_parent"
@@ -15,16 +16,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@color/material_deep_teal_500">
 
                 <TextView
                     android:id="@+id/title"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="@dimen/title_layout_height"
-                    android:background="@color/material_deep_teal_500"
                     android:fontFamily="Arial"
                     android:paddingBottom="@dimen/title_bottom_padding"
                     android:paddingLeft="@dimen/title_left_padding"
@@ -33,7 +33,19 @@
                     android:textSize="@dimen/title_text_size"
                     android:textStyle="bold"
                     tools:text="title" />
-            </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/favorite_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginRight="20dp"
+                    android:button="@android:drawable/btn_star" />
+
+
+            </RelativeLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -56,10 +68,11 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:paddingLeft="@dimen/center_panel_ll_right_ll_padding">
+                    android:paddingLeft="@dimen/bottom_panel_ll_padding_left"
+                    android:weightSum="1">
 
                     <TextView
                         android:id="@+id/release_date"
@@ -75,7 +88,9 @@
                         android:textSize="@dimen/vote_average_textsize"
                         android:textStyle="bold"
                         tools:text="vote_average" />
+
                 </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout
@@ -94,6 +109,68 @@
                     android:textStyle="bold"
                     tools:text="plotSynopsis" />
             </LinearLayout>
+            <LinearLayout
+                android:paddingTop="20dp"
+                android:orientation="vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/darkgrey" />
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:theme="@style/BoldText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/trailers" />
+                </LinearLayout>
+                <LinearLayout
+                    android:paddingLeft="40dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <ListView
+                        android:id="@+id/trailer_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                    </ListView>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/darkgrey" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:theme="@style/BoldText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/reviews" />
+                </LinearLayout>
+                <LinearLayout
+                    android:paddingLeft="40dp"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <ListView
+                        android:id="@+id/review_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                    </ListView>
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

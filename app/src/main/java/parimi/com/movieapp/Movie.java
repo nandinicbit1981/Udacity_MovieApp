@@ -54,6 +54,35 @@ public class Movie implements Parcelable{
         this.vote_average = vote_average;
     }
 
+    protected Movie(Parcel in) {
+        poster_path = in.readString();
+        adult = in.readByte() != 0;
+        overview = in.readString();
+        release_date = in.readString();
+        genre_ids = in.createIntArray();
+        id = in.readInt();
+        original_title = in.readString();
+        original_language = in.readString();
+        title = in.readString();
+        backdrop_path = in.readString();
+        popularity = in.readFloat();
+        vote_count = in.readInt();
+        video = in.readByte() != 0;
+        vote_average = in.readFloat();
+    }
+
+    public static final Creator<Movie> CREATOR = new Creator<Movie>() {
+        @Override
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
     @Override
     public int describeContents() {
         return 0;

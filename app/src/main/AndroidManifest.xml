@@ -28,6 +28,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="parimi.com.movieapp.MainActivity" />
         </activity>
+
+        <provider android:name=".MovieContentProvider"
+            android:exported="true"
+            android:readPermission="true"
+            android:writePermission="true"
+            android:authorities="parimi.com.movieapp" />
     </application>
 
 </manifest>

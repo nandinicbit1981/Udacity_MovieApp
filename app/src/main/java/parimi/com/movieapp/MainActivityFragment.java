@@ -188,6 +188,7 @@ public class MainActivityFragment extends Fragment {
                     Gson gson = new Gson();
                     String movieJson = gson.toJson(item);
                     intent.putExtra("movieInfo", movieJson);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -197,6 +198,7 @@ public class MainActivityFragment extends Fragment {
     }
 
 }
+
 
 
 class Utility {
