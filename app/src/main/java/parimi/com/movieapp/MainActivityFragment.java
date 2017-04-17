@@ -146,7 +146,9 @@ public class MainActivityFragment extends Fragment {
     }
     @Override
     public void onResume() {
-        if (!sortOrder.equals(PreferenceUtils.getSortPreference(getActivity()))) {
+        if (!sortOrder.equals(PreferenceUtils.getSortPreference(getActivity())) || showFavorites != PreferenceUtils.getFavoritesPreference(getActivity())) {
+            sortOrder = PreferenceUtils.getSortPreference(getActivity());
+            showFavorites = PreferenceUtils.getFavoritesPreference(getActivity());
             getMovieList();
         }
         super.onResume();
