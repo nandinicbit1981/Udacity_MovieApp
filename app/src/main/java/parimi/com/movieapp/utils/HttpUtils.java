@@ -6,13 +6,13 @@ import com.loopj.android.http.RequestParams;
 
 import parimi.com.movieapp.BuildConfig;
 
-public class HttpUtils {
-    private static final String BASE_URL = "https://api.themoviedb.org/3/movie/";
-    private static final String API_KEY = BuildConfig.THE_MOVIE_DB_API_TOKEN;//"de9c335bcf10921c29babb85a73c47dd";//TODO replace with correct API;
+import static parimi.com.movieapp.utils.Constants.BASE_URL;
 
+public class HttpUtils {
+    private static final String API_KEY = BuildConfig.THE_MOVIE_DB_API_TOKEN;
     private static AsyncHttpClient client = new AsyncHttpClient();
 
-    public static void getImage(String relativeUrl, RequestParams params, AsyncHttpResponseHandler responseHandler) {
+    public static void getMoviesBySortPref(String relativeUrl, RequestParams params, AsyncHttpResponseHandler responseHandler) {
         params.add("api_key", API_KEY);
         client.get(getAbsoluteUrl(relativeUrl), params, responseHandler);
     }

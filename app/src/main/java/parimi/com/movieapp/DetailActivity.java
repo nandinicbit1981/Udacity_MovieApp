@@ -33,6 +33,8 @@ import parimi.com.movieapp.utils.HttpUtils;
 import parimi.com.movieapp.utils.MovieUtils;
 import parimi.com.movieapp.utils.PreferenceUtils;
 
+import static parimi.com.movieapp.utils.Constants.BASE_IMAGE_URL;
+
 public class DetailActivity extends AppCompatActivity {
 
     JSONObject movie;
@@ -40,6 +42,11 @@ public class DetailActivity extends AppCompatActivity {
     @Bind(R.id.favorite_btn)
     CheckBox favoriteBtn;
 
+    String[] projection = {
+            MovieContract.MovieEntry._ID,
+            MovieContract.MovieEntry.COLUMN_MOVIE,
+            MovieContract.MovieEntry.TITLE,
+            MovieContract.MovieEntry.POSTER_PATH};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +62,7 @@ public class DetailActivity extends AppCompatActivity {
             ButterKnife.bind(this);
             Glide
                     .with(getApplicationContext())
-                    .load("http://image.tmdb.org/t/p/w185/" + url)
+                    .load(BASE_IMAGE_URL + url)
                     .centerCrop()
                     .crossFade()
                     .into(iconView);
@@ -81,7 +88,6 @@ public class DetailActivity extends AppCompatActivity {
             }
 
 
-
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -96,8 +102,8 @@ public class DetailActivity extends AppCompatActivity {
             values.put(MovieContract.MovieEntry.COLUMN_MOVIE, movie.getString(getString(R.string.movie_id)));
             values.put(MovieContract.MovieEntry.TITLE, movie.getString(getString(R.string.title)));
             values.put(MovieContract.MovieEntry.POSTER_PATH, movie.getString(getString(R.string.poster_path)));
-            if(movieDB != null && String.valueOf(movieDB.getMovie_id()).equals(movie.getString(getString(R.string.movie_id)))) {
-                getContentResolver().delete( MovieContract.MovieEntry.CONTENT_URI,
+            if (movieDB != null && String.valueOf(movieDB.getMovie_id()).equals(movie.getString(getString(R.string.movie_id)))) {
+                getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
                         MovieContract.MovieEntry.COLUMN_MOVIE + " = " + movieDB.getMovie_id(),
                         null
                 );
@@ -109,9 +115,13 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    /***
+     * Check if the movie in context is favorite.
+     * @return
+     */
 
     private MovieDB dbFavRecord() {
-      MovieDB movieDB = null;
+        MovieDB movieDB = null;
         try {
             Cursor cursor = getContentResolver().query(
                     MovieContract.MovieEntry.CONTENT_URI,
@@ -120,16 +130,21 @@ public class DetailActivity extends AppCompatActivity {
                     null,
                     null);
 
-                if(cursor.moveToFirst()) {
-                    movieDB = MovieUtils.cursorToMovie(cursor);
-                }
+            if (cursor.moveToFirst()) {
+                movieDB = MovieUtils.cursorToMovie(cursor);
+            }
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e);
         }
         return movieDB;
     }
 
+
+    /**
+     * this method gets the list of reviews from movieDB api
+     * @param id
+     */
     private void getReviewList(String id) {
         HttpUtils.getReviews(String.valueOf(id), new RequestParams(), new JsonHttpResponseHandler() {
             @Override
@@ -151,6 +166,12 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
     }
+
+    /**
+     * creates list of the reviews for the movie in context. This is used to update the details activity
+     * @param jsonArray
+     * @return
+     */
 
     public ArrayList<Review> createReviewsList(JSONArray jsonArray) {
         ArrayList<Review> reviewArrayList = new ArrayList<>();
@@ -174,7 +195,11 @@ public class DetailActivity extends AppCompatActivity {
     }
 
 
-    private void getTrailerList(String id){
+    /**
+     * this method gets the list of trailers from movieDB api
+     * @param id
+     */
+    private void getTrailerList(String id) {
         HttpUtils.getTrailers(id, new RequestParams(), new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -196,6 +221,12 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
+
+    /**
+     * creates list of the trailers for the movie in context. This is used to update the details activity
+     * @param jsonArray
+     * @return
+     */
     public ArrayList<Trailer> createTrailersList(JSONArray jsonArray) {
         ArrayList<Trailer> trailerArrayList = new ArrayList<>();
         try {
@@ -221,7 +252,10 @@ public class DetailActivity extends AppCompatActivity {
         return trailerArrayList;
     }
 
-
+    /**
+     * This method updates the ui with data.
+     * I have separated this part of the code as this will be required both when api is called or when local database is queried.
+     */
     public void updateDetails() {
         try {
             String dateOfRelease = movie.get(getString(R.string.release_date)).toString();
@@ -232,21 +266,22 @@ public class DetailActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.plotSynopsis)).setText(movie.get(getString(R.string.overview)).toString());
             getTrailerList(String.valueOf(movie.get(getString(R.string.movie_id))));
             getReviewList(String.valueOf(movie.get(getString(R.string.movie_id))));
-            setFavorite();
+            isFavoriteMovie();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public void setFavorite() {
-        try {
-            if (!PreferenceUtils.getFavoritesPreference(getBaseContext())) {
-                String[] projection = {
-                        MovieContract.MovieEntry._ID,
-                        MovieContract.MovieEntry.COLUMN_MOVIE,
-                        MovieContract.MovieEntry.TITLE,
-                        MovieContract.MovieEntry.POSTER_PATH};
+    /**
+     * This method sets the favorite star button yellow , if the movie is in the current database.
+     */
 
+    public void isFavoriteMovie() {
+        try {
+            // if favorite setting is NOT enabled
+            if (!PreferenceUtils.getFavoritesPreference(getBaseContext())) {
+
+                //check to see if the movie exists in the local database
                 Cursor cursor = getContentResolver().query(
                         MovieContract.MovieEntry.CONTENT_URI,
                         projection,
@@ -260,10 +295,10 @@ public class DetailActivity extends AppCompatActivity {
                     favoriteBtn.setChecked(false);
                 }
                 cursor.close();
-            } else {
+            } else { // if favorite setting is enabled
                 favoriteBtn.setChecked(true);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
